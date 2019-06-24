@@ -1,0 +1,216 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"os"
+	"strconv"
+)
+
+var (
+	readString func() string
+	readBytes  func() []byte
+)
+
+func init() {
+	readString, readBytes = newReadString(os.Stdin)
+}
+
+func newReadString(ior io.Reader) (func() string, func() []byte) {
+	r := bufio.NewScanner(ior)
+	r.Buffer(make([]byte, 1024), int(1e+11))
+	r.Split(bufio.ScanWords)
+
+	f1 := func() string {
+		if !r.Scan() {
+			panic("Scan failed")
+		}
+		return r.Text()
+	}
+	f2 := func() []byte {
+		if !r.Scan() {
+			panic("Scan failed")
+		}
+		return r.Bytes()
+	}
+	return f1, f2
+}
+
+func readInt() int {
+	return int(readInt64())
+}
+
+func readInt64() int64 {
+	i, err := strconv.ParseInt(readString(), 10, 64)
+	if err != nil {
+		panic(err.Error())
+	}
+	return i
+}
+
+func readFloat64() float64 {
+	f, err := strconv.ParseFloat(readString(), 64)
+	if err != nil {
+		panic(err.Error())
+	}
+	return f
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func minInt64(a, b int64) int64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func maxInt64(a, b int64) int64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
+func absInt64(a int64) int64 {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
+func sum(a []int) int {
+	var ret int
+	for i := range a {
+		ret += a[i]
+	}
+	return ret
+}
+
+func sumInt64(a []int64) int64 {
+	var ret int64
+	for i := range a {
+		ret += a[i]
+	}
+	return ret
+}
+
+func sumFloat64(a []float64) float64 {
+	var ret float64
+	for i := range a {
+		ret += a[i]
+	}
+	return ret
+}
+
+func gcdInt64(m, n int64) int64 {
+	for m%n != 0 {
+		m, n = n, m%n
+	}
+	return n
+}
+
+func lcmInt64(m, n int64) int64 {
+	return m / gcdInt64(m, n) * n
+}
+
+// sort ------------------------------------------------------------
+
+type int64Array []int64
+
+func (s int64Array) Len() int           { return len(s) }
+func (s int64Array) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s int64Array) Less(i, j int) bool { return s[i] < s[j] }
+
+type xxx struct {
+	x int
+}
+
+type sortArray []xxx
+
+func (s sortArray) Len() int           { return len(s) }
+func (s sortArray) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s sortArray) Less(i, j int) bool { return s[i].x < s[j].x }
+
+// -----------------------------------------------------------------
+
+var n, m int
+var maze [][]byte
+var memo [][]int
+
+type xy struct {
+	x int
+	y int
+}
+
+var dir = []xy{
+	xy{0, -1},
+	xy{1, 0},
+	xy{0, 1},
+	xy{-1, 0},
+}
+
+func bfs(s xy) int {
+	queue := []xy{s}
+	memo[s.x][s.y] = 0
+
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		if maze[cur.x][cur.y] == 'G' {
+			return memo[cur.x][cur.y]
+		}
+		for _, d := range dir {
+			next := xy{cur.x + d.x, cur.y + d.y}
+			if next.x < 0 || next.x > n-1 || next.y < 0 || next.y > n-1 ||
+				maze[next.x][next.y] == '#' || memo[next.x][next.y] != -1 {
+				continue
+			}
+			memo[next.x][next.y] = memo[cur.x][cur.y] + 1
+			queue = append(queue, next)
+		}
+	}
+	return -1
+}
+
+func main() {
+	n = readInt()
+	m = readInt()
+	maze = make([][]byte, n)
+	for i := range maze {
+		maze[i] = readBytes()
+	}
+
+	var s xy
+	memo = make([][]int, n)
+	for i := range maze {
+		memo[i] = make([]int, m)
+		for j := range maze[i] {
+			memo[i][j] = -1
+			if maze[i][j] == 'S' {
+				s = xy{i, j}
+			}
+		}
+	}
+	fmt.Println(bfs(s))
+}
