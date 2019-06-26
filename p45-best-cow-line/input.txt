@@ -1,0 +1,19 @@
+# sample
+6
+ACDBCB
+
+ABCBCD
+
+
+# test1
+6
+AACDBA
+
+AAABCD
+
+
+# test2
+6
+ABCDAA
+
+AAABCD
