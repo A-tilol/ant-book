@@ -1,0 +1,12 @@
+# sample
+4 4
+abcd
+becd
+
+3
+
+
+# test1
+
+
+# test2
